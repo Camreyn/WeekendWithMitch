@@ -3,6 +3,7 @@
   LogOut,
   PlugZap,
   RefreshCcw,
+  Search,
   Send,
   ShieldCheck,
   Upload,
@@ -14,6 +15,8 @@ import {
   createSession,
   DeviceConfig,
   DeviceResponse,
+  DeviceSummary,
+  findDevices,
   getDevice,
   installVoicePack,
 } from "./api";
@@ -33,6 +36,7 @@ export function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [config, setConfig] = useState<DeviceConfig>(() => loadConfig());
   const [device, setDevice] = useState<DeviceResponse | null>(null);
+  const [deviceMatches, setDeviceMatches] = useState<DeviceSummary[]>([]);
   const [file, setFile] = useState<File | null>(null);
   const [status, setStatus] = useState<Status>({
     tone: "neutral",
@@ -63,6 +67,31 @@ export function App() {
       setDevice(nextDevice);
       setStatus({ tone: "success", text: "Device connected" });
     });
+  }
+
+  async function handleDeviceSearch() {
+    await runAction("devices", async () => {
+      const result = await findDevices();
+      setDeviceMatches(result.devices);
+      if (result.devices.length === 1) {
+        selectDevice(result.devices[0]);
+        setStatus({ tone: "success", text: "1 device found" });
+        return;
+      }
+      setStatus({
+        tone: result.devices.length ? "success" : "danger",
+        text: result.devices.length
+          ? `${result.devices.length} devices found`
+          : result.message || "No devices found",
+      });
+    });
+  }
+
+  function selectDevice(match: DeviceSummary) {
+    const nextConfig = { appName: match.app, deviceId: match.id };
+    setConfig(nextConfig);
+    persistConfig(nextConfig);
+    setDevice(null);
   }
 
   async function handleInstall() {
@@ -179,10 +208,36 @@ export function App() {
               />
             </label>
           </div>
-          <button disabled={!isAuthenticated || busyAction === "device"} type="submit">
-            <RefreshCcw aria-hidden="true" />
-            Check device
-          </button>
+          <div className="button-row">
+            <button disabled={!isAuthenticated || busyAction === "device"} type="submit">
+              <RefreshCcw aria-hidden="true" />
+              Check
+            </button>
+            <button
+              className="secondary"
+              disabled={!isAuthenticated || busyAction === "devices"}
+              onClick={handleDeviceSearch}
+              type="button"
+            >
+              <Search aria-hidden="true" />
+              Find
+            </button>
+          </div>
+          {deviceMatches.length ? (
+            <div className="device-list">
+              {deviceMatches.map((match) => (
+                <button
+                  className="device-option"
+                  key={`${match.app}:${match.id}`}
+                  onClick={() => selectDevice(match)}
+                  type="button"
+                >
+                  <span>{match.name || match.model || match.id}</span>
+                  <small>{match.app} / {match.id}</small>
+                </button>
+              ))}
+            </div>
+          ) : null}
           <div className="device-strip">
             <span>{device ? deviceName : "No device loaded"}</span>
             {device ? <CheckCircle2 aria-hidden="true" /> : <XCircle aria-hidden="true" />}
@@ -243,3 +298,4 @@ function loadConfig(): DeviceConfig {
 function persistConfig(config: DeviceConfig) {
   window.localStorage.setItem("dreame-device-config", JSON.stringify(config));
 }
+

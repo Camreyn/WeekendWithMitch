@@ -184,6 +184,41 @@ h2 {
   min-width: 0;
 }
 
+.device-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.device-option {
+  align-items: flex-start;
+  background: #ffffff;
+  border-color: #c7d3cf;
+  color: #253330;
+  flex-direction: column;
+  gap: 2px;
+  height: auto;
+  min-height: 54px;
+  padding: 10px 12px;
+  text-align: left;
+  width: 100%;
+}
+
+.device-option:hover:not(:disabled) {
+  background: #f4f7f5;
+  border-color: #9fb0aa;
+}
+
+.device-option span,
+.device-option small {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.device-option small {
+  color: #5f6c68;
+  font-weight: 700;
+}
 .device-strip {
   align-items: center;
   background: #f4f7f5;
@@ -292,3 +327,4 @@ h2 {
     font-size: 1.85rem;
   }
 }
+

@@ -63,6 +63,52 @@ describe("worker API", () => {
     );
   });
 
+
+  it("discovers devices from accessible profile payloads", async () => {
+    const cookie = await createSessionCookie();
+    const upstream = vi.fn(async (url: string) => {
+      if (url.endsWith("/profile")) {
+        return jsonResponse({
+          payload: {
+            devices: [
+              {
+                id: 107265,
+                app: "dreamehome",
+                name: "Kitchen X40",
+                model: "dreame.vacuum.r2243",
+                country: "us",
+              },
+            ],
+          },
+        });
+      }
+      return jsonResponse({ message: "not found" }, 404);
+    });
+    vi.stubGlobal("fetch", upstream);
+
+    const response = await worker.fetch(
+      new Request("https://worker.test/api/devices", {
+        headers: { ...originHeaders, cookie },
+      }),
+      env,
+      {} as ExecutionContext,
+    );
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({
+      devices: [
+        {
+          id: "107265",
+          app: "dreamehome",
+          name: "Kitchen X40",
+          model: "dreame.vacuum.r2243",
+          country: "us",
+          source: "/profile",
+        },
+      ],
+    });
+  });
+
   it("uploads a voice file and sends an install command", async () => {
     const upstream = vi
       .fn()
@@ -133,4 +179,5 @@ function jsonResponse(body: unknown, status = 200) {
     headers: { "content-type": "application/json" },
   });
 }
+
 

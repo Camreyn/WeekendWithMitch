@@ -7,6 +7,20 @@ export type ApiError = {
   message: string;
 };
 
+export type DeviceSummary = {
+  id: string;
+  app: string;
+  name?: string;
+  model?: string;
+  country?: string;
+  source?: string;
+};
+
+export type DeviceListResponse = {
+  devices: DeviceSummary[];
+  message?: string;
+};
+
 export type DeviceResponse = {
   id?: string | number;
   name?: string;
@@ -41,6 +55,10 @@ export async function createSession(accessToken: string): Promise<void> {
 
 export async function clearSession(): Promise<void> {
   await request("/api/session", { method: "DELETE" });
+}
+
+export async function findDevices(): Promise<DeviceListResponse> {
+  return request<DeviceListResponse>("/api/devices");
 }
 
 export async function getDevice(config: DeviceConfig): Promise<DeviceResponse> {
@@ -93,3 +111,4 @@ function parseJson(text: string): unknown {
     return { message: text };
   }
 }
+

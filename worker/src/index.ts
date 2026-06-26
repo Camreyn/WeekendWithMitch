@@ -10,6 +10,15 @@ type SessionPayload = {
   createdAt: number;
 };
 
+type DeviceCandidate = {
+  id: string;
+  app: string;
+  name?: string;
+  model?: string;
+  country?: string;
+  source: string;
+};
+
 const COOKIE_NAME = "dvpi_session";
 const DEFAULT_API_BASE = "https://api-vacuum.mindsolo.net/api";
 
@@ -32,6 +41,10 @@ const worker: ExportedHandler<Env> = {
 
       if (url.pathname === "/api/device" && request.method === "GET") {
         return withCors(await getDevice(request, env), request, env);
+      }
+
+      if (url.pathname === "/api/devices" && request.method === "GET") {
+        return withCors(await listDevices(request, env), request, env);
       }
 
       if (url.pathname === "/api/voice/install" && request.method === "POST") {
@@ -105,6 +118,49 @@ async function getDevice(request: Request, env: Env): Promise<Response> {
   return proxyJson(upstream);
 }
 
+async function listDevices(request: Request, env: Env): Promise<Response> {
+  const session = await requireSession(request, env);
+  const candidates: DeviceCandidate[] = [];
+  const seen = new Set<string>();
+  const paths = [
+    "/profile",
+    "/profile/auth-app",
+    "/profile/wanted-apps",
+    "/devices",
+    "/profile/devices",
+    "/dreamehome/devices",
+    "/mihome/devices",
+    "/mova/devices",
+    "/trouver/devices",
+  ];
+
+  for (const path of paths) {
+    const response = await upstreamFetch(env, path, {
+      headers: upstreamHeaders(session.token),
+    });
+
+    if (!response.ok || !response.headers.get("content-type")?.includes("application/json")) {
+      continue;
+    }
+
+    const payload = await response.json().catch(() => null);
+    for (const device of extractDeviceCandidates(payload, path)) {
+      const key = `${device.app}:${device.id}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        candidates.push(device);
+      }
+    }
+  }
+
+  return json({
+    devices: candidates,
+    message: candidates.length
+      ? undefined
+      : "No devices were found in the accessible Mindsolo API responses. Open the Mindsolo Devices page once, then use the app/device values from the device URL.",
+  });
+}
+
 async function installVoicePack(request: Request, env: Env): Promise<Response> {
   const session = await requireSession(request, env);
   const form = await request.formData();
@@ -171,6 +227,67 @@ async function installVoicePack(request: Request, env: Env): Promise<Response> {
   });
 
   return proxyJson(installResponse);
+}
+
+function extractDeviceCandidates(value: unknown, source: string): DeviceCandidate[] {
+  const results: DeviceCandidate[] = [];
+
+  function visit(node: unknown) {
+    if (Array.isArray(node)) {
+      for (const item of node) {
+        const device = normalizeDeviceCandidate(item, source);
+        if (device) {
+          results.push(device);
+        }
+        visit(item);
+      }
+      return;
+    }
+
+    if (node && typeof node === "object") {
+      for (const child of Object.values(node as Record<string, unknown>)) {
+        visit(child);
+      }
+    }
+  }
+
+  visit(value);
+  return results;
+}
+
+function normalizeDeviceCandidate(value: unknown, source: string): DeviceCandidate | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return null;
+  }
+
+  const record = value as Record<string, unknown>;
+  const id = stringValue(record.id) || stringValue(record.device_id) || stringValue(record.did);
+  const app = stringValue(record.app) || stringValue(record.app_name) || stringValue(record.platform);
+  const name = stringValue(record.name) || stringValue(record.title) || stringValue(record.device_name);
+  const model = stringValue(record.model) || stringValue(record.model_name);
+
+  if (!id || !app || (!name && !model)) {
+    return null;
+  }
+
+  return {
+    id,
+    app,
+    name,
+    model,
+    country: stringValue(record.country),
+    source,
+  };
+}
+
+function stringValue(value: unknown): string | undefined {
+  if (typeof value === "string" && value.trim()) {
+    return value.trim();
+  }
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return String(value);
+  }
+  return undefined;
 }
 
 function upstreamHeaders(token: string): HeadersInit {
@@ -340,4 +457,5 @@ class HttpError extends Error {
     super(message);
   }
 }
+
 
