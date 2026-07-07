@@ -1,0 +1,19 @@
+{
+  "faces": {
+    "mitch": {
+      "idle": "",
+      "steady": "",
+      "warningLeft": "",
+      "warningRight": "",
+      "fallen": ""
+    },
+    "leftHandler": "",
+    "rightHandler": ""
+  },
+  "music": {
+    "src": "",
+    "loop": true,
+    "startMuted": true,
+    "volume": 0.45
+  }
+}

@@ -1,48 +1,61 @@
-﻿# Dreame Voice-Pack Installer
+# Weekend With Mitch
 
-A GitHub Pages webapp plus Cloudflare Worker API for installing a user-provided Dreame voice-pack file through the Mindsolo-compatible API flow.
+A Vite/React canvas game where two handlers try to keep Mitch balanced in the middle.
 
 ## Local development
 
-1. Install dependencies:
+```sh
+npm install
+npm run dev
+```
 
-   ```sh
-   npm install
-   ```
+To test from another device on the same network:
 
-2. Create a Worker secret for local development:
+```sh
+npm run dev -- --host 0.0.0.0 --port 5173
+```
 
-   ```sh
-   npx wrangler secret put SESSION_SECRET
-   ```
+## Changing game assets on GitHub
 
-3. Start the Worker:
+All production-editable assets live in `public/`. Vite copies that folder as-is during the Vercel build, so a GitHub commit that changes these files will appear after the next Vercel deployment.
 
-   ```sh
-   npm run worker:dev
-   ```
+The committed `public/game-config.json` starts with blank paths so the game has clean fallbacks. After uploading files, edit it to point at the files you want:
 
-4. Start the frontend:
+```json
+{
+  "faces": {
+    "mitch": {
+      "idle": "/assets/faces/mitch-idle.png",
+      "steady": "/assets/faces/mitch-steady.png",
+      "warningLeft": "/assets/faces/mitch-warning-left.png",
+      "warningRight": "/assets/faces/mitch-warning-right.png",
+      "fallen": "/assets/faces/mitch-fallen.png"
+    },
+    "leftHandler": "/assets/faces/left-handler.png",
+    "rightHandler": "/assets/faces/right-handler.png"
+  },
+  "music": {
+    "src": "/assets/audio/music.mp3",
+    "loop": true,
+    "startMuted": true,
+    "volume": 0.45
+  }
+}
+```
 
-   ```sh
-   npm run dev
-   ```
+Recommended paths:
 
-The frontend defaults to `http://localhost:8787` for API calls. Set `VITE_API_BASE_URL` when using a deployed Worker.
+- Mitch face states: `public/assets/faces/mitch-idle.png`, `mitch-steady.png`, `mitch-warning-left.png`, `mitch-warning-right.png`, `mitch-fallen.png`
+- Handler faces: `public/assets/faces/left-handler.png`, `public/assets/faces/right-handler.png`
+- Music: `public/assets/audio/music.mp3`
 
-## Deployment
+PNG, JPG, WebP, MP3, OGG, and WAV files are fine as long as the config path matches the committed filename. Blank or missing face paths do not break the game; it falls back to the drawn characters. Leave `music.src` blank until an audio file is committed, and the music button stays disabled.
 
-Set these GitHub repository values before deploying:
+Browsers block autoplay, so music starts only after pressing the Music button or `M`.
 
-- Actions variable `VITE_API_BASE_URL`: deployed Worker URL, for example `https://dreame-voicepack-installer-api.example.workers.dev`.
-- Actions secret `CLOUDFLARE_API_TOKEN`: Cloudflare token with Worker deploy permissions.
+## Build
 
-Set these Cloudflare Worker values:
+```sh
+npm run build
+```
 
-- Secret `SESSION_SECRET`: long random string for encrypted session cookies.
-- Variable `ALLOWED_ORIGIN`: GitHub Pages URL for this repository.
-- Variable `MINDSOLO_API_BASE`: defaults to `https://api-vacuum.mindsolo.net/api`.
-
-## Notes
-
-This app does not mirror or redistribute Mindsolo voice packs. It only uploads and installs a voice-pack file selected by the user.
