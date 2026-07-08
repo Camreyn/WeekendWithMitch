@@ -1,4 +1,5 @@
 import {
+  Coffee,
   ArrowLeft,
   ArrowRight,
   Hand,
@@ -306,6 +307,10 @@ export function App() {
         <div className="title-block">
           <p className="eyebrow">Sidewalk party survival</p>
           <h1>Weekend With Mitch</h1>
+          <a className="tip-link" href="https://ko-fi.com/camreyn" rel="noreferrer" target="_blank">
+            <Coffee aria-hidden="true" />
+            <span>Tips</span>
+          </a>
         </div>
         <div className="scoreboard" aria-label="Scoreboard">
           <div>
@@ -881,4 +886,5 @@ function createSnapshot(sim: SimState): Snapshot {
 function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
 }
+
 

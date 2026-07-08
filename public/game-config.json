@@ -1,17 +1,17 @@
 {
   "faces": {
     "mitch": {
-      "idle": "",
-      "steady": "",
-      "warningLeft": "",
-      "warningRight": "",
-      "fallen": ""
+      "idle": "/assets/faces/file_00000000e31471f79111c959cc50ccb7.png",
+      "steady": "/assets/faces/file_00000000e31471f79111c959cc50ccb7.png",
+      "warningLeft": "/assets/faces/file_00000000e31471f79111c959cc50ccb7.png",
+      "warningRight": "/assets/faces/file_00000000e31471f79111c959cc50ccb7.png",
+      "fallen": "/assets/faces/file_00000000e31471f79111c959cc50ccb7.png"
     },
     "leftHandler": "",
     "rightHandler": ""
   },
   "music": {
-    "src": "",
+    "src": "/assets/audio/TheMatador.mp3",
     "loop": true,
     "startMuted": true,
     "volume": 0.45

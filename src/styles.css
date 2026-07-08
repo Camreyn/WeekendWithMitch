@@ -20,7 +20,8 @@ body {
   overflow-x: hidden;
 }
 
-button {
+button,
+a {
   font: inherit;
 }
 
@@ -80,6 +81,10 @@ button svg {
 }
 
 .title-block {
+  align-items: flex-start;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
   min-width: 0;
 }
 
@@ -99,6 +104,36 @@ h1 {
   line-height: 0.94;
   margin: 0;
   text-wrap: balance;
+}
+.tip-link {
+  align-items: center;
+  background: #ffdd77;
+  border: 1px solid rgba(255, 255, 255, 0.44);
+  border-radius: 8px;
+  color: #221a13;
+  display: inline-flex;
+  font-size: 0.94rem;
+  font-weight: 900;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 12px;
+  text-decoration: none;
+  transition:
+    filter 160ms ease,
+    transform 160ms ease;
+}
+
+.tip-link:hover {
+  filter: brightness(1.06);
+}
+
+.tip-link:active {
+  transform: translateY(1px);
+}
+
+.tip-link svg {
+  height: 18px;
+  width: 18px;
 }
 
 .scoreboard {
@@ -330,4 +365,5 @@ h1 {
     gap: 3px;
   }
 }
+
 
