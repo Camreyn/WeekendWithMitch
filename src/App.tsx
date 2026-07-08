@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { PointerEvent } from "react";
+import { Analytics } from "@vercel/analytics/react";
 
 type Inputs = {
   left: boolean;
@@ -392,6 +393,7 @@ export function App() {
       <footer className="parody-notice">
         <strong>Parody notice:</strong> Weekend With Mitch is an unofficial fair-use parody game for commentary and entertainment. It is not affiliated with, endorsed by, or sponsored by any public figure, campaign, office, or rights holder.
       </footer>
+      <Analytics />
     </main>
   );
 }
@@ -890,6 +892,3 @@ function createSnapshot(sim: SimState): Snapshot {
 function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
 }
-
-
-
