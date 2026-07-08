@@ -388,6 +388,10 @@ export function App() {
           <span>Survive as long as possible while the crowd gets harder to fool.</span>
         </div>
       </section>
+
+      <footer className="parody-notice">
+        <strong>Parody notice:</strong> Weekend With Mitch is an unofficial fair-use parody game for commentary and entertainment. It is not affiliated with, endorsed by, or sponsored by any public figure, campaign, office, or rights holder.
+      </footer>
     </main>
   );
 }
@@ -886,5 +890,6 @@ function createSnapshot(sim: SimState): Snapshot {
 function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
 }
+
 
 
